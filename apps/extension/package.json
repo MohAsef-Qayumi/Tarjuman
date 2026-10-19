@@ -1,0 +1,25 @@
+{
+  "name": "@tarjuman/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "e2e": "node e2e/run.mjs",
+    "build:test": "TARJUMAN_API=http://localhost:3301 node build.mjs"
+  },
+  "dependencies": {
+    "@tarjuman/core": "*"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.5",
+    "esbuild": "^0.28.2",
+    "happy-dom": "^21.0.3",
+    "playwright": "^1.49.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}
