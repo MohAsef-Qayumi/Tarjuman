@@ -12,7 +12,8 @@
     "build:test": "TARJUMAN_API=http://localhost:3301 node build.mjs"
   },
   "dependencies": {
-    "@tarjuman/core": "*"
+    "@tarjuman/core": "*",
+    "@tarjuman/panel": "*"
   },
   "devDependencies": {
     "@types/chrome": "^0.3.5",

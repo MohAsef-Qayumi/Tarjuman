@@ -1,11 +1,12 @@
 import type { LanguageCode, SourceLanguage } from "@tarjuman/core/languages"
 import type { TranslateResult, WordResult } from "@tarjuman/core/schema"
+import type { Result } from "@tarjuman/panel"
 
 export type Request =
   | { type: "translate"; text: string; from: SourceLanguage; to: LanguageCode }
   | { type: "word"; word: string; context: string; to: LanguageCode }
 
-export type Reply<T> = { ok: true; data: T } | { ok: false; error: string }
+export type Reply<T> = Result<T>
 
 export type TranslateReply = Reply<TranslateResult>
 export type WordReply = Reply<WordResult>
