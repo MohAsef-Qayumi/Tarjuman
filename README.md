@@ -23,6 +23,8 @@ Languages: English, Dari, Pashto, Urdu, Turkish, Indonesian (and Arabic as a sou
 
 - **`packages/core`** — prompts written for classical texts, a glossary of ~50 technical terms (only the terms found in a passage are sent), Arabic normalisation, response validation, and a provider chain. Any OpenAI-compatible API works; if one provider is rate-limited, down, or returns malformed output, the next one is tried, so free tiers can be stacked.
 - **`apps/web`** — the API and a “try it” page. Requests are validated, rate-limited per IP to protect the quota, and cached.
+- **`packages/panel`** — the translation panel UI (translation, terms, tap-a-word), shared by the extension and the desktop app.
+- **`apps/desktop`** — an Electron app with an always-on-top bubble and a global shortcut, for the Shamela desktop program and any other app.
 - **`apps/extension`** — a Manifest V3 extension. It appears automatically on Shamela and on any page that is mostly Arabic. All UI lives in a shadow root, so it neither breaks nor is broken by the host page. Results are cached on the device.
 
 ### Translation rules
@@ -63,6 +65,24 @@ npm run build -w @tarjuman/extension   # points at https://tarjuman-xi.vercel.ap
 
 Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and choose `apps/extension/dist`. The server address can also be changed later from the extension's popup.
 
+## Desktop app (Shamela for Windows, macOS, Linux)
+
+The Shamela desktop program can't host a browser extension, so `apps/desktop` adds a small floating **ت** bubble that stays on top of every app.
+
+1. Select Arabic text in Shamela (or any program).
+2. Click the bubble, or press **Ctrl+Shift+Y** from anywhere.
+3. The translation panel opens beside the bubble, with the same features as the extension.
+
+How it reads the selection: the bubble never takes keyboard focus, so Shamela keeps its selection. Tarjuman briefly uses the clipboard (sends Ctrl+C to the focused app, reads the text) and then **restores whatever was on your clipboard before**. On Linux it reads the selection directly without touching the clipboard. On macOS, allow Tarjuman under *System Settings → Privacy & Security → Accessibility*.
+
+The tray icon has the language menu, the shortcut, *Start with Windows*, and the settings file (server address, shortcut).
+
+```bash
+npm run start -w @tarjuman/desktop     # run from source
+```
+
+**Installers** are built by the *Desktop release* workflow (Actions tab → Desktop release → Run workflow), which produces a Windows `.exe`, a macOS `.dmg` and a Linux `.AppImage`. The builds are not code-signed yet, so Windows SmartScreen will warn on first launch (*More info → Run anyway*).
+
 ## Deploy
 
 On Vercel, import the repository and set **Root Directory** to `apps/web`. Add the provider variables from the table above. Then build the extension with `TARJUMAN_API` set to the deployment URL.
@@ -74,13 +94,14 @@ npm test                                         # unit tests (core, web, extens
 npm run build -w @tarjuman/web
 npm run build:test -w @tarjuman/extension
 npm run e2e -w @tarjuman/extension               # loads the extension into Chromium
+npm run build -w @tarjuman/desktop
+xvfb-run -a npm run e2e -w @tarjuman/desktop     # launches the desktop app (xvfb-run on headless Linux)
 ```
 
 The end-to-end test runs the API in mock mode, serves a Shamela-style page and drives the real extension: selection, paragraph picking, word lookup, language switching, device caching and visibility rules.
 
 ## Roadmap
 
-- Desktop app (Windows/macOS) with an always-on-top bubble for the Shamela desktop program
 - Android app with a “display over other apps” bubble; iOS share extension
 - On-screen text recognition as a fallback when text can't be selected
 - Translation quality evaluation set reviewed by native speakers

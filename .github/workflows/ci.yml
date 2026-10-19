@@ -34,3 +34,17 @@ jobs:
       - run: npm run build -w @tarjuman/web
       - run: npm run build:test -w @tarjuman/extension
       - run: npm run e2e -w @tarjuman/extension
+
+  desktop-e2e:
+    runs-on: ubuntu-latest
+    needs: check
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @tarjuman/web
+      - run: npm run build -w @tarjuman/desktop
+      - run: xvfb-run -a npm run e2e -w @tarjuman/desktop
