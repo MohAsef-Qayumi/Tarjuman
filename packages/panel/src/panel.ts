@@ -50,12 +50,27 @@ export class TranslationPanel {
     this.render(body, reply.data)
   }
 
+  /** Closed by the user: removes the panel and notifies the host. */
   close() {
+    this.reset()
+    this.options.onClose?.()
+  }
+
+  /** Removes the panel without notifying the host (e.g. to show an empty state). */
+  reset() {
     this.el?.remove()
     this.el = null
     this.body = null
     this.source = ""
-    this.options.onClose?.()
+  }
+
+  /** Languages changed elsewhere (e.g. a tray menu): update the pickers and re-translate. */
+  setLanguages(langs: { from: SourceLanguage; to: LanguageCode }) {
+    this.langs = { ...langs }
+    const [from, to] = Array.from(this.el?.querySelectorAll("select") ?? [])
+    if (from) from.value = langs.from
+    if (to) to.value = langs.to
+    if (this.source) void this.show(this.source)
   }
 
   private open(): HTMLElement {
