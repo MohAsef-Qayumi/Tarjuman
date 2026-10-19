@@ -31,7 +31,8 @@
     "nsis": {
       "oneClick": false,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "Tarjuman-Setup-${version}.${ext}"
     },
     "mac": {
       "target": "dmg",

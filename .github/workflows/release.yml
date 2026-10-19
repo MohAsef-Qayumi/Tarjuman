@@ -1,11 +1,12 @@
-name: Desktop release
+name: Release
 
-# Builds installers on each OS. Run it manually from the Actions tab, or push
-# a tag like desktop-v0.1.0 to also attach the installers to a GitHub release.
+# Builds the desktop installers on each OS and the browser extension.
+# Run it manually from the Actions tab, or push a tag like v0.1.0 to also
+# publish everything as a GitHub release.
 on:
   workflow_dispatch:
   push:
-    tags: ["desktop-v*"]
+    tags: ["v*"]
 
 permissions:
   contents: write
@@ -49,3 +50,23 @@ jobs:
             apps/desktop/release/*.exe
             apps/desktop/release/*.dmg
             apps/desktop/release/*.AppImage
+
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @tarjuman/extension
+      - run: cd apps/extension/dist && zip -r ../../../tarjuman-extension.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tarjuman-extension
+          path: tarjuman-extension.zip
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: tarjuman-extension.zip
