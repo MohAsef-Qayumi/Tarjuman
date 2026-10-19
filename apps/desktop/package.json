@@ -1,0 +1,58 @@
+{
+  "name": "@tarjuman/desktop",
+  "productName": "Tarjuman",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Translate classical Arabic from any app, including the Shamela desktop program.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "node build.mjs",
+    "start": "npm run build && electron .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "e2e": "node e2e/run.mjs",
+    "dist": "npm run build && electron-builder --publish never"
+  },
+  "build": {
+    "appId": "dev.tarjuman.desktop",
+    "productName": "Tarjuman",
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Education"
+    }
+  },
+  "devDependencies": {
+    "@tarjuman/core": "*",
+    "@tarjuman/panel": "*",
+    "@types/node": "^22.20.5",
+    "electron": "38.8.6",
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.49.1",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  },
+  "author": "Mohammad Asef Qayumi",
+  "homepage": "https://github.com/MohAsef-Qayumi/Tarjuman"
+}
