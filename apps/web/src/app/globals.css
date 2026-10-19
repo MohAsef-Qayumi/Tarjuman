@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: var(--font-amiri), "Traditional Arabic", serif;
+  --color-bg: #faf8f3;
+  --color-surface: #ffffff;
+  --color-fg: #1c1917;
+  --color-muted: #78716c;
+  --color-line: #e7e2d8;
+  --color-brand: #14532d;
+  --color-accent: #b45309;
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    -webkit-font-smoothing: antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+.arabic {
+  font-family: var(--font-arabic);
+  font-size: 1.35rem;
+  line-height: 2.2;
+}
