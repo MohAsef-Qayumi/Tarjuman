@@ -40,7 +40,9 @@
     "linux": {
       "target": "AppImage",
       "category": "Education"
-    }
+    },
+    "executableName": "tarjuman",
+    "publish": null
   },
   "devDependencies": {
     "@tarjuman/core": "*",
@@ -54,5 +56,6 @@
     "vitest": "^5.0.5"
   },
   "author": "Mohammad Asef Qayumi",
-  "homepage": "https://github.com/MohAsef-Qayumi/Tarjuman"
+  "homepage": "https://github.com/MohAsef-Qayumi/Tarjuman",
+  "desktopName": "tarjuman.desktop"
 }

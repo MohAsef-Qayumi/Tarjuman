@@ -27,7 +27,8 @@ const api = spawn("npx", ["next", "start", "-p", String(API_PORT)], {
 async function launch(selection, userData) {
   const app = await electron.launch({
     executablePath: electronPath,
-    args: [here("..")],
+    // GitHub's Ubuntu runners block the Chromium sandbox (AppArmor), so disable it there only.
+    args: [here(".."), ...(process.env.CI ? ["--no-sandbox"] : [])],
     env: {
       ...process.env,
       TARJUMAN_API: `http://localhost:${API_PORT}`,
