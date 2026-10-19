@@ -53,6 +53,8 @@ Add one or more; they are tried in the order of `TRANSLATE_PROVIDERS`.
 
 Choose a current model from each provider's model list. Free tiers have rate limits, and some providers may use free-tier requests to improve their models; check their terms.
 
+**Failover.** Keys and models accept comma-separated lists (`GEMINI_MODEL=preferred,backup`, `GROQ_API_KEY=key1,key2`). When a provider fails it is put on a cooldown — as long as its `Retry-After` header asks, otherwise 1 minute for rate limits, 30 seconds for overload or timeouts, and 10 minutes for a bad key or model name — so later requests go straight to one that works instead of waiting for the same failure again. `GET /api/health` shows which providers are cooling down (keys are never included).
+
 ## Browser extension
 
 ```bash

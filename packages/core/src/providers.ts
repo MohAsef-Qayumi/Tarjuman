@@ -1,7 +1,10 @@
 import type { ChatMessage } from "./prompts"
 
 export type ProviderConfig = {
+  /** Provider family, e.g. "gemini". */
   name: string
+  /** Unique, log-safe identifier (never contains the key), e.g. "gemini:model-a#2". */
+  id: string
   baseUrl: string
   apiKey: string
   model: string
@@ -18,18 +21,32 @@ export const providerPresets: Record<string, { baseUrl: string; keyEnv: string; 
   openrouter: { baseUrl: "https://openrouter.ai/api/v1", keyEnv: "OPENROUTER_API_KEY", modelEnv: "OPENROUTER_MODEL" },
 }
 
+const list = (value: string | undefined) =>
+  (value ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+
 /**
  * Builds the provider chain from environment variables, in the order given by
- * TRANSLATE_PROVIDERS (default: gemini,groq,openrouter). Providers without a
- * key or model are skipped.
+ * TRANSLATE_PROVIDERS (default: gemini,groq,openrouter). Key and model
+ * variables accept comma-separated lists; every model is tried with every key,
+ * preferred models first. Providers without a key or model are skipped.
  */
 export function providersFromEnv(env: Record<string, string | undefined>): ProviderConfig[] {
-  const order = (env.TRANSLATE_PROVIDERS ?? "gemini,groq,openrouter").split(",").map((s) => s.trim())
-  return order.flatMap((name) => {
+  return list(env.TRANSLATE_PROVIDERS ?? "gemini,groq,openrouter").flatMap((name) => {
     const preset = providerPresets[name]
-    const apiKey = preset && env[preset.keyEnv]
-    const model = preset && env[preset.modelEnv]
-    return preset && apiKey && model ? [{ name, baseUrl: preset.baseUrl, apiKey, model }] : []
+    if (!preset) return []
+    const keys = list(env[preset.keyEnv])
+    return list(env[preset.modelEnv]).flatMap((model) =>
+      keys.map((apiKey, i) => ({
+        name,
+        id: `${name}:${model}${keys.length > 1 ? `#${i + 1}` : ""}`,
+        baseUrl: preset.baseUrl,
+        apiKey,
+        model,
+      })),
+    )
   })
 }
 
@@ -38,9 +55,20 @@ export class ProviderError extends Error {
     readonly provider: string,
     readonly status: number | null,
     message: string,
+    /** From the provider's Retry-After header, when it sent one. */
+    readonly retryAfterMs?: number,
   ) {
     super(`${provider}: ${message}`)
   }
+}
+
+function retryAfter(res: Response): number | undefined {
+  const value = res.headers.get("retry-after")
+  if (!value) return undefined
+  const seconds = Number(value)
+  if (Number.isFinite(seconds)) return seconds * 1000
+  const date = Date.parse(value)
+  return Number.isNaN(date) ? undefined : Math.max(0, date - Date.now())
 }
 
 export type Fetch = typeof fetch
@@ -49,7 +77,7 @@ export async function complete(
   provider: ProviderConfig,
   messages: ChatMessage[],
   fetchImpl: Fetch = fetch,
-  timeoutMs = 30_000,
+  timeoutMs = 15_000,
 ): Promise<string> {
   let res: Response
   try {
@@ -65,17 +93,17 @@ export async function complete(
       signal: AbortSignal.timeout(timeoutMs),
     })
   } catch (error) {
-    throw new ProviderError(provider.name, null, (error as Error).message)
+    throw new ProviderError(provider.id, null, (error as Error).message)
   }
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "")
-    throw new ProviderError(provider.name, res.status, `HTTP ${res.status} ${detail.slice(0, 200)}`)
+    throw new ProviderError(provider.id, res.status, `HTTP ${res.status} ${detail.slice(0, 200)}`, retryAfter(res))
   }
 
   const body = (await res.json()) as { choices?: { message?: { content?: string } }[] }
   const content = body.choices?.[0]?.message?.content
-  if (!content) throw new ProviderError(provider.name, res.status, "Empty response")
+  if (!content) throw new ProviderError(provider.id, res.status, "Empty response")
   return content
 }
 
