@@ -3,8 +3,8 @@ import { cp, mkdir, rm } from "node:fs/promises"
 
 const watch = process.argv.includes("--watch")
 const outdir = "dist"
-// Point the extension at your deployed server: TARJUMAN_API=https://your-app.vercel.app npm run build
-const api = process.env.TARJUMAN_API ?? "http://localhost:3000"
+// Defaults to the production server; override with TARJUMAN_API=http://localhost:3000 for local development.
+const api = process.env.TARJUMAN_API ?? "https://tarjuman-xi.vercel.app"
 
 await rm(outdir, { recursive: true, force: true })
 await mkdir(outdir, { recursive: true })

@@ -58,7 +58,7 @@ Choose a current model from each provider's model list. Free tiers have rate lim
 ## Browser extension
 
 ```bash
-TARJUMAN_API=https://your-deployment.vercel.app npm run build -w @tarjuman/extension
+npm run build -w @tarjuman/extension   # points at https://tarjuman-xi.vercel.app; set TARJUMAN_API to override
 ```
 
 Then open `chrome://extensions`, enable **Developer mode**, click **Load unpacked** and choose `apps/extension/dist`. The server address can also be changed later from the extension's popup.
